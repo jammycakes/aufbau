@@ -53,12 +53,22 @@ class Graph:
             if not success:
                 raise GraphError('Cyclic dependencies were found in the list of tasks.')
 
-    def walk(self, target):
-        first_node = self._dag.get(target, False)
-        if not first_node:
-            raise GraphError('The specified target {0} has not been defined.'.format(target))
+    def walk(self, *targets):
+        invalid_targets = set(targets).difference(self._dag)
+        if invalid_targets:
+            if len(invalid_targets) == 1:
+                raise GraphError('The specific target {0} has not been defined.'.format(invalid_targets.pop()))
+            else:
+                raise GraphError(
+                    'The specified targets {0} have not been defined.'.format(
+                        ', '.join(invalid_targets)
+                    )
+                )
 
-        # Now do a topological sort of the selected node and all its dependencies
+        first_nodes = [self._dag[target] for target in targets]
+
+        # Now do a topological sort of the selected nodes
+        # and all their  dependencies
 
         visited = set()
         stack = []
@@ -70,7 +80,8 @@ class Graph:
                     topological_sort(dep)
             stack.insert(0, node)
 
-        topological_sort(first_node)
+        for first_node in first_nodes:
+            topological_sort(first_node)
         return stack
 
 class Node:

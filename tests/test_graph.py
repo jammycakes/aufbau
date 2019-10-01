@@ -117,8 +117,8 @@ class TestWalk(unittest.TestCase):
         graph.build()
         self.graph = graph
 
-    def _getNodeNames(self, initialNodeName):
-        return [node.name for node in self.graph.walk(initialNodeName)]
+    def _getNodeNames(self, *initialNodeNames):
+        return [node.name for node in self.graph.walk(*initialNodeNames)]
 
     def testBaseDependency(self):
         nodes = self._getNodeNames('six')
@@ -159,3 +159,11 @@ class TestWalk(unittest.TestCase):
         self.assertGreater(six_index, 2)
         nodes.remove('six')
         self.assertListEqual(['zero', 'one', 'two', 'three', 'four', 'five'], nodes)
+
+    def testThreeAndSixDependencies(self):
+        nodes = self._getNodeNames('three', 'six')
+        # Order should be 3, 4, 5 with 6 anywhere
+        six_index = nodes.index('six')
+        self.assertGreater(six_index, -1)
+        nodes.remove('six')
+        self.assertListEqual(['three', 'four', 'five'], nodes)
