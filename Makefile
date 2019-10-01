@@ -1,6 +1,6 @@
 .PHONY: test build deps release upload upload-test
 
-VERSION = $(shell python -c "import lambda_tools;print(lambda_tools.VERSION)")
+VERSION = $(shell python -c "import aufbau;print(aufbau.VERSION)")
 
 test:
 	python setup.py test -a tests
