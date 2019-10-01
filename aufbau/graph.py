@@ -38,10 +38,7 @@ class Graph:
                 ])
             )
 
-        # TODO: build up the DAG
-
         unsorted = set(self._targets)
-
         while unsorted:
             success = False
             for name in unsorted.copy():
@@ -56,6 +53,25 @@ class Graph:
             if not success:
                 raise GraphError('Cyclic dependencies were found in the list of tasks.')
 
+    def walk(self, target):
+        first_node = self._dag.get(target, False)
+        if not first_node:
+            raise GraphError('The specified target {0} has not been defined.'.format(target))
+
+        # Now do a topological sort of the selected node and all its dependencies
+
+        visited = set()
+        stack = []
+
+        def topological_sort(node):
+            visited.add(node)
+            for dep in node.deps:
+                if not dep in visited:
+                    topological_sort(dep)
+            stack.insert(0, node)
+
+        topological_sort(first_node)
+        return stack
 
 class Node:
     """

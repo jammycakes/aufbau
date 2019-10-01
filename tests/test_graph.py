@@ -88,3 +88,74 @@ class TestGraph(unittest.TestCase):
 
         # Assert
         self.assertRaises(GraphError, lambda: graph.build())
+
+class TestWalk(unittest.TestCase):
+
+    def setUp(self):
+        callable = lambda: False
+
+        # Arrange
+        graph = Graph()
+        graph.register_target(callable, 'zero')
+        graph.register_target(callable, 'one')
+        graph.register_target(callable, 'two')
+        graph.register_target(callable, 'three')
+        graph.register_target(callable, 'four')
+        graph.register_target(callable, 'five')
+        graph.register_target(callable, 'six')
+        graph.register_dependency('zero', 'one')
+        graph.register_dependency('zero', 'three')
+        graph.register_dependency('one', 'two')
+        graph.register_dependency('one', 'three')
+        graph.register_dependency('two', 'three')
+        graph.register_dependency('two', 'four')
+        graph.register_dependency('two', 'five')
+        graph.register_dependency('three', 'four')
+        graph.register_dependency('three', 'five')
+        graph.register_dependency('four', 'five')
+        graph.register_dependency('two', 'six')
+        graph.build()
+        self.graph = graph
+
+    def _getNodeNames(self, initialNodeName):
+        return [node.name for node in self.graph.walk(initialNodeName)]
+
+    def testBaseDependency(self):
+        nodes = self._getNodeNames('six')
+        self.assertListEqual(['six'], nodes)
+
+    def testOtherBaseDependency(self):
+        nodes = self._getNodeNames('five')
+        self.assertListEqual(['five'], nodes)
+
+    def testFourDependencies(self):
+        nodes = self._getNodeNames('four')
+        self.assertListEqual(['four', 'five'], nodes)
+
+    def testThreeDependencies(self):
+        nodes = self._getNodeNames('three')
+        self.assertListEqual(['three', 'four', 'five'], nodes)
+
+    def testTwoDependencies(self):
+        nodes = self._getNodeNames('two')
+        # Order should be 2, 3, 4, 5 with 6 somewhere after 2
+        six_index = nodes.index('six')
+        self.assertGreater(six_index, 0)
+        nodes.remove('six')
+        self.assertListEqual(['two', 'three', 'four', 'five'], nodes)
+
+    def testOneDependencies(self):
+        nodes = self._getNodeNames('one')
+        # Order should be 1, 2, 3, 4, 5 with 6 somewhere after 2
+        six_index = nodes.index('six')
+        self.assertGreater(six_index, 1)
+        nodes.remove('six')
+        self.assertListEqual(['one', 'two', 'three', 'four', 'five'], nodes)
+
+    def testZeroDependencies(self):
+        nodes = self._getNodeNames('zero')
+        # Order should be 0, 1, 2, 3, 4, 5 with 6 somewhere after 2
+        six_index = nodes.index('six')
+        self.assertGreater(six_index, 2)
+        nodes.remove('six')
+        self.assertListEqual(['zero', 'one', 'two', 'three', 'four', 'five'], nodes)
