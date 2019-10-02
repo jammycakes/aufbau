@@ -1,2 +1,6 @@
+import sys
+from aufbau.builder import Builder
+
 def main():
-    pass
+    builder = Builder(sys.argv)
+    builder.run()
