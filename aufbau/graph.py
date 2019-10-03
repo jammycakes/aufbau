@@ -17,8 +17,9 @@ class Graph:
         self._targets[name] = callable
 
     def register_dependency(self, target, dependency):
-        self._deps[target] = self._deps[target] if target in self._deps else set()
-        self._deps[target].add(dependency)
+        deps = self._deps[target] = self._deps[target] if target in self._deps else []
+        if dependency not in deps:
+            deps.append(dependency)
 
     def find_unknown_dependencies(self):
         return [
@@ -78,7 +79,7 @@ class Graph:
             for dep in node.deps:
                 if not dep in visited:
                     topological_sort(dep)
-            stack.insert(0, node)
+            stack.append(node)
 
         for first_node in first_nodes:
             topological_sort(first_node)

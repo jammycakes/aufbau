@@ -48,7 +48,6 @@ class Builder(object):
         from aufbau.graph import graph
         graph.build()
         self.targets = graph.walk(*self.target_names)
-        self.targets.reverse()
         for target in self.targets:
             print('Executing target: {0}'.format(target.name))
             target.action(self)

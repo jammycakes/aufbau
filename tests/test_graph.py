@@ -18,8 +18,8 @@ class TestSample(unittest.TestCase):
 
     def test_set_deps(self):
         expected = {
-            'build': {'clean'},
-            'test': {'build'}
+            'build': ['clean'],
+            'test': ['build']
         }
         self.assertDictEqual(expected, self.graph._deps)
 
@@ -130,35 +130,35 @@ class TestWalk(unittest.TestCase):
 
     def testFourDependencies(self):
         nodes = self._getNodeNames('four')
-        self.assertListEqual(['four', 'five'], nodes)
+        self.assertListEqual(['five', 'four'], nodes)
 
     def testThreeDependencies(self):
         nodes = self._getNodeNames('three')
-        self.assertListEqual(['three', 'four', 'five'], nodes)
+        self.assertListEqual(['five', 'four', 'three'], nodes)
 
     def testTwoDependencies(self):
         nodes = self._getNodeNames('two')
-        # Order should be 2, 3, 4, 5 with 6 somewhere after 2
+        # Order should be 2, 3, 4, 5 with 6 somewhere before 2
         six_index = nodes.index('six')
-        self.assertGreater(six_index, 0)
+        self.assertLessEqual(six_index, 3)
         nodes.remove('six')
-        self.assertListEqual(['two', 'three', 'four', 'five'], nodes)
+        self.assertListEqual(['five', 'four', 'three', 'two'], nodes)
 
     def testOneDependencies(self):
         nodes = self._getNodeNames('one')
         # Order should be 1, 2, 3, 4, 5 with 6 somewhere after 2
         six_index = nodes.index('six')
-        self.assertGreater(six_index, 1)
+        self.assertLessEqual(six_index, 3)
         nodes.remove('six')
-        self.assertListEqual(['one', 'two', 'three', 'four', 'five'], nodes)
+        self.assertListEqual(['five', 'four', 'three', 'two', 'one'], nodes)
 
     def testZeroDependencies(self):
         nodes = self._getNodeNames('zero')
         # Order should be 0, 1, 2, 3, 4, 5 with 6 somewhere after 2
         six_index = nodes.index('six')
-        self.assertGreater(six_index, 2)
+        self.assertLessEqual(six_index, 3)
         nodes.remove('six')
-        self.assertListEqual(['zero', 'one', 'two', 'three', 'four', 'five'], nodes)
+        self.assertListEqual(['five', 'four', 'three', 'two', 'one', 'zero'], nodes)
 
     def testThreeAndSixDependencies(self):
         nodes = self._getNodeNames('three', 'six')
@@ -166,4 +166,43 @@ class TestWalk(unittest.TestCase):
         six_index = nodes.index('six')
         self.assertGreater(six_index, -1)
         nodes.remove('six')
-        self.assertListEqual(['three', 'four', 'five'], nodes)
+        self.assertListEqual(['five', 'four', 'three'], nodes)
+
+class TestWalkOrder(unittest.TestCase):
+    """
+    Tasks should be called in the order in which they are invoked.
+    Their dependencies should be called in the order in which they were registered.
+    """
+
+    def register_targets(self):
+        callable = lambda: False
+        graph = Graph()
+        graph.register_target(callable, 'six')
+        graph.register_target(callable, 'five')
+        graph.register_target(callable, 'four')
+        graph.register_target(callable, 'three')
+        graph.register_target(callable, 'two')
+        graph.register_target(callable, 'one')
+        return graph
+
+    def testOrderOne(self):
+        graph = self.register_targets()
+        graph.register_dependency('five', 'six')
+        graph.register_dependency('three', 'four')
+        graph.register_dependency('one', 'two')
+        graph.register_dependency('one', 'four')
+        graph.build()
+
+        node_names = [node.name for node in graph.walk('one', 'three', 'five')]
+        self.assertListEqual(['two', 'four', 'one', 'three', 'six', 'five'], node_names)
+
+    def testOrderOne(self):
+        graph = self.register_targets()
+        graph.register_dependency('five', 'six')
+        graph.register_dependency('three', 'four')
+        graph.register_dependency('one', 'four')
+        graph.register_dependency('one', 'two')
+        graph.build()
+
+        node_names = [node.name for node in graph.walk('one', 'three', 'five')]
+        self.assertListEqual(['four', 'two', 'one', 'three', 'six', 'five'], node_names)
