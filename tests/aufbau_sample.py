@@ -1,4 +1,4 @@
-from aufbau.core import *
+from aufbau import target, depends_on, graph
 
 @target
 def clean():

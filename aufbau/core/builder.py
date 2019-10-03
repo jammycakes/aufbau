@@ -31,7 +31,7 @@ class Builder(object):
         """
         Creates a new instance of the Builder class.
         :param args: The command line arguments, as provided by sys.argv.
-        """
+         """
 
         parser = argparse.ArgumentParser(description='Builds an aufbau project.')
         parser.add_argument('--file', '-f', help='Path to the aufbau script.')
@@ -45,7 +45,7 @@ class Builder(object):
 
     def run(self):
         load_script(self.script)
-        from aufbau.graph import graph
+        from aufbau.core.graph import graph
         graph.build()
         self.targets = graph.walk(*self.target_names)
         for target in self.targets:

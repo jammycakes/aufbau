@@ -48,7 +48,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'aufbau=aufbau.command:main'
+            'aufbau=aufbau.core.command:main'
         ]
     },
     tests_require=['pytest'],

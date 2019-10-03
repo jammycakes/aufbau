@@ -1,6 +1,6 @@
 import unittest
 
-from aufbau.graph import Graph, GraphError
+from aufbau.core.graph import Graph, GraphError
 from tests import aufbau_sample
 
 class TestSample(unittest.TestCase):
