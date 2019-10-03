@@ -82,7 +82,12 @@ class Builder(object):
         from aufbau.core.graph import graph
         graph.build()
         self.targets = graph.walk(*self.target_names)
-        for target in self.targets:
-            print('Executing target: {0}'.format(target.name))
-            target.action(BuildContext(self, target))
-            print('Completed target: {0}'.format(target.name))
+        cwd = os.getcwd()
+        try:
+            os.chdir(self.root)
+            for target in self.targets:
+                print('Executing target: {0}'.format(target.name))
+                target.action(BuildContext(self, target))
+                print('Completed target: {0}'.format(target.name))
+        finally:
+            os.chdir(cwd)
