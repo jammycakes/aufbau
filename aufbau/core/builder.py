@@ -45,6 +45,17 @@ class BuildContext(object):
         """
         return os.path.abspath(os.path.join(self.root, relpath))
 
+    def task(self, taskClass):
+        """
+        Creates and initialises a task to run.
+        Usage: `ctx.task(Task).run(*args, **kwargs)
+
+        :param taskClass: The task class to run.
+        :return: The task to be run.
+        """
+        return taskClass(self)
+
+
 class Builder(object):
     """
     The top level object that executes the build script.
