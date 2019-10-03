@@ -22,6 +22,29 @@ def load_script(path):
     spec.loader.exec_module(module)
     return module
 
+class BuildContext(object):
+    """
+    A build context object, which gets passed to each target and to each task.
+    """
+
+    def __init__(self, builder, target):
+        """
+        Creates a new instance of the BuildContext object.
+        :param builder: The builder instance for which this context is created.
+        :param target: The target being executed.
+        """
+        self.target = target
+        self.root = builder.root
+
+    def abspath(self, relpath):
+        """
+        Given a path relative to the directory containing the build script,
+        finds the absolute path.
+        :param relpath: The path to the file, relative to an absolute path.
+        :return: The absolute path to the file.
+        """
+        return os.path.abspath(os.path.join(self.root, relpath))
+
 class Builder(object):
     """
     The top level object that executes the build script.
@@ -50,5 +73,5 @@ class Builder(object):
         self.targets = graph.walk(*self.target_names)
         for target in self.targets:
             print('Executing target: {0}'.format(target.name))
-            target.action(self)
+            target.action(BuildContext(self, target))
             print('Completed target: {0}'.format(target.name))
