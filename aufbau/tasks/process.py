@@ -1,3 +1,5 @@
+import os
+import os.path
 import subprocess
 import aufbau.tasks
 
@@ -8,14 +10,8 @@ class Execute(aufbau.tasks.Task):
     """
 
     def run(self, executable, *args, **kwargs):
-        found_prefix = [
-            prefix
-            for prefix in ['./', '~/', '.\\', '~\\']
-            if executable.startswith(prefix)
-        ]
-        found_prefix = found_prefix[0] if found_prefix else False
-        if found_prefix:
-            executable = self.context.abspath(executable[len(found_prefix):])
+        if executable.find(os.sep) >= 0 or executable.find(os.altsep) >= 0:
+            executable = self.context.abspath(executable)
 
         run_args = [executable] + list(args)
         result = subprocess.run(run_args, **kwargs)
