@@ -17,7 +17,7 @@ To run the build
 ----------------
 Sample usage:
 
-```python
+```
 aufbau [--file FILE] [target [target]]
 ```
 
