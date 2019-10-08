@@ -27,7 +27,6 @@ class WriteFile(aufbau.tasks.Task):
     """
     def run(self, path, lines):
         lines = [line + '\n' for line in lines]
-        print(lines)
         with open(self.context.abspath(path), 'w') as f:
             f.writelines(lines)
 
